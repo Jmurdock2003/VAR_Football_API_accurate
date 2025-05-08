@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+opencv-python
+ultralytics
+deep_sort_realtime
+rdflib
+torch
+torchvision
+numpy
+python-multipart

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Football VAR Frame-by-Frame</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 20px; }
+    video { display: none; }
+    canvas {
+      max-width: 800px; width: 100%; height: auto;
+      border: 1px solid #ccc; margin: 10px auto; display: block;
+    }
+    #status { margin: 10px 0; }
+    #controls { margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h2>Upload & Play Frame-by-Frame</h2>
+  <div id="controls">
+    <input type="file" id="fileInput" accept="video/*"/>
+    <button id="uploadBtn">Upload & Play</button>
+    <button id="pauseBtn">Pause</button>
+  </div>
+  <div id="status">Idle</div>
+  <video id="video"></video>
+  <canvas id="canvas"></canvas>
+  <script src="/static/app.js"></script>
+</body>
+</html>
