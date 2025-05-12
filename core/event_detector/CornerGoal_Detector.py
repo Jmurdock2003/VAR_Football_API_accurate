@@ -1,5 +1,5 @@
 # CornerGoal_Detector.py
-from event_detector.Rule_Knowledge_Graph import RuleKnowledgeGraph
+from .Rule_Knowledge_Graph import RuleKnowledgeGraph
 
 class CornerGoalDetector:
     def __init__(self, field_width=1280, goal_width=300):

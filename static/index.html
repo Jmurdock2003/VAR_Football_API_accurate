@@ -1,29 +1,148 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <title>Football VAR Frame-by-Frame</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Murdock VAR System</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; }
-    video { display: none; }
-    canvas {
-      max-width: 800px; width: 100%; height: auto;
-      border: 1px solid #ccc; margin: 10px auto; display: block;
+    :root {
+      --primary: #1e3a8a;
+      --accent: #fbbf24;
+      --bg: #f9fafb;
+      --border: #d1d5db;
     }
-    #status { margin: 10px 0; }
-    #controls { margin: 10px 0; }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background-color: var(--bg);
+      color: #111827;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+
+    .container {
+      display: flex;
+      gap: 20px;
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    .main-panel {
+      flex: 3;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .side-panel {
+      flex: 1;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      max-height: 600px;
+      overflow-y: auto;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .clip-thumb {
+      width: 100%;
+      margin-bottom: 10px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 15px;
+    }
+
+    #controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    #controls input[type="file"],
+    #controls select,
+    #controls button {
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+    }
+
+    #controls button {
+      background-color: var(--primary);
+      color: white;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    #controls button:hover {
+      background-color: #0f2a5c;
+    }
+
+    #status {
+      margin: 10px 0;
+      font-style: italic;
+      color: #4b5563;
+    }
+
+    footer {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #6b7280;
+    }
   </style>
 </head>
 <body>
-  <h2>Upload & Play Frame-by-Frame</h2>
-  <div id="controls">
-    <input type="file" id="fileInput" accept="video/*"/>
-    <button id="uploadBtn">Upload & Play</button>
-    <button id="pauseBtn">Pause</button>
+  <h1>Murdock VAR System</h1>
+  <div class="container">
+    <div class="main-panel">
+      <div id="controls">
+        <input type="file" id="fileInput" accept="video/*">
+        <select id="direction">
+          <option value="right">Team 1 Attacking Right</option>
+          <option value="left">Team 1 Attacking Left</option>
+        </select>
+        <button id="uploadBtn">Upload & Play</button>
+        <button id="pauseBtn">Pause</button>
+        <button id="halftimeBtn">Halftime</button>
+      </div>
+      <div id="status">Idle</div>
+      <video id="video" style="display: none;"></video>
+      <canvas id="canvas"></canvas>
+    </div>
+    <div class="side-panel" id="clipPanel">
+      <h4>Event Replays</h4>
+      <!-- Thumbnails will be injected here -->
+    </div>
   </div>
-  <div id="status">Idle</div>
-  <video id="video"></video>
-  <canvas id="canvas"></canvas>
+  <footer>
+    © 2025 Murdock VAR System — For Research & Development Use Only
+  </footer>
   <script src="/static/app.js"></script>
 </body>
 </html>

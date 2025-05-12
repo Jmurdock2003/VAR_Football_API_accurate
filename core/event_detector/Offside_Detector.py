@@ -1,50 +1,55 @@
-from event_detector.Rule_Knowledge_Graph import RuleKnowledgeGraph
-
+from .Rule_Knowledge_Graph import RuleKnowledgeGraph
 
 class OffsideDetector:
     def __init__(self):
         self.kg = RuleKnowledgeGraph()
+        self.offside_candidates = []
+        self.last_kick_frame = -1
+        self.last_kicked_by_team = None
+        self.triggered_offside = None
 
-    def check_offside(self, player_positions, ball_position, defenders, frame_width, attack_direction):
-        if len(defenders) < 2 or not player_positions:
-            return None
+    def update_candidates(self, attackers, defenders, ball_position, attack_dir, frame_width):
+        self.offside_candidates = []
 
-        # Sort defenders by x-position to find second last defender
-        defenders_sorted = sorted(defenders, key=lambda p: p[1][0], reverse=(attack_direction == "left"))
-        second_last_def_x = defenders_sorted[1][1][0]
+        if len(defenders) < 2:
+            return
 
-        # Find attacker closest to ball
-        min_dist = float("inf")
-        receiver = None
-        for player_id, (x, y) in player_positions:
-            dist = ((x - ball_position[0])**2 + (y - ball_position[1])**2)**0.5
-            if dist < min_dist:
-                min_dist = dist
-                receiver = (player_id, x)
+        sorted_defs = sorted(defenders, key=lambda d: self._get_far_side(d['bbox'], attack_dir), reverse=(attack_dir == 'left'))
+        second_last_def_x = self._get_far_side(sorted_defs[1]['bbox'], attack_dir)
+        ball_x = ball_position[0]
 
-        if receiver is None or min_dist > 50:
-            return None  # No eligible attacker close enough
+        conditions = self.kg.get_conditions("Offside")
 
-        player_id, player_x = receiver
-        centre_x = frame_width // 2
+        for player in attackers:
+            player_x = self._get_far_side(player['bbox'], attack_dir)
 
-        # Apply rule conditions from knowledge graph
-        conditions = self.kg.get_conditions("Offside Rule")
+            condition_results = {
+                "Ball is played or touched by teammate": True,  # handled externally
+                "Player is in opponent's half": (
+                    (attack_dir == "right" and player_x > frame_width // 2) or
+                    (attack_dir == "left" and player_x < frame_width // 2)
+                ),
+                "Player is ahead of the second-last defender": (
+                    (attack_dir == "right" and player_x > second_last_def_x) or
+                    (attack_dir == "left" and player_x < second_last_def_x)
+                ),
+                "Player is ahead of the ball": (
+                    (attack_dir == "right" and player_x > ball_x) or
+                    (attack_dir == "left" and player_x < ball_x)
+                ),
+                "Player interferes with play": True  # evaluated on possession
+            }
 
-        player_in_opponent_half = (
-            (attack_direction == "right" and player_x > centre_x) or
-            (attack_direction == "left" and player_x < centre_x)
-        )
-        ahead_of_ball = (
-            (attack_direction == "right" and player_x > ball_position[0]) or
-            (attack_direction == "left" and player_x < ball_position[0])
-        )
-        ahead_of_defender = (
-            (attack_direction == "right" and player_x > second_last_def_x) or
-            (attack_direction == "left" and player_x < second_last_def_x)
-        )
+            if all(condition_results.get(c, False) for c in conditions):
+                self.offside_candidates.append((player['id'], player.get('team')))
 
-        if all([player_in_opponent_half, ahead_of_ball, ahead_of_defender]):
-            return player_id
-
+    def check_violation(self, new_possessor_id):
+        for pid, team in self.offside_candidates:
+            if new_possessor_id == pid:
+                self.triggered_offside = pid
+                return pid
         return None
+
+    def _get_far_side(self, bbox, direction):
+        x1, _, x2, _ = bbox
+        return max(x1, x2) if direction == "right" else min(x1, x2)

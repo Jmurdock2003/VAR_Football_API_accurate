@@ -1,22 +1,27 @@
-# core/detector.py
 from ultralytics import YOLO
 
 class Detector:
-    def __init__(self, model_path: str = "best.pt"):
-        print(">>> Using ultralytics YOLO from core/detector.py")  # debug
+    def __init__(self, model_path="best.pt"):
         self.model = YOLO(model_path)
-        try:
-            self.model.fuse()
-        except Exception:
-            pass
-        self.model.conf = 0.35  # better filtering of weak overlapping boxes
 
     def __call__(self, frame):
-        results = self.model(frame)[0]
-        detections = []
-        for x1, y1, x2, y2, conf, cls in results.boxes.data.tolist():
-            detections.append([
-                int(x1), int(y1), int(x2), int(y2),
-                int(cls), float(conf)
-            ])
-        return detections
+        results = self.model(frame)
+        detections = results[0].boxes.data.cpu().numpy()  # xyxy + conf + cls
+        return [[float(x1), float(y1), float(x2), float(y2), int(cls), float(conf)]
+                for x1, y1, x2, y2, conf, cls in detections]
+
+    def detect_ball_only(self, frame, conf_thresh=0.25):
+        results = self.model(frame, conf=conf_thresh)
+        detections = results[0].boxes.data.cpu().numpy()
+
+        ball_dets = []
+        for x1, y1, x2, y2, conf, cls in detections:
+            if int(cls) == 0:  # class 0 = ball
+                ball_dets.append({
+                    "bbox": [float(x1), float(y1), float(x2), float(y2)],
+                    "conf": float(conf),
+                    "cls": "0",
+                    "id": None
+                })
+
+        return ball_dets
