@@ -1,3 +1,7 @@
+def get_bbox_area(bbox):
+    x1, y1, x2, y2 = bbox
+    return (x2 - x1) * (y2 - y1)
+
 def get_centre(bbox):
     x1, y1, x2, y2 = bbox
     return [(x1 + x2) / 2, (y1 + y2) / 2]
