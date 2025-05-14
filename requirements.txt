@@ -9,3 +9,5 @@ torchvision
 numpy
 python-multipart
 scikit-learn
+scikit-image
+supervision

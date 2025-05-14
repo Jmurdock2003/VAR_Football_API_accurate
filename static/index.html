@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Murdock VAR System</title>
+  <title>Automated VAR System</title>
   <style>
     :root {
       --primary: #1e3a8a;
       --accent: #fbbf24;
       --bg: #f9fafb;
       --border: #d1d5db;
+      --error: #dc2626;
     }
 
     * {
@@ -110,6 +111,12 @@
       color: #4b5563;
     }
 
+    #error {
+      margin: 10px 0;
+      color: var(--error);
+      font-weight: bold;
+    }
+
     footer {
       margin-top: 20px;
       font-size: 14px;
@@ -118,7 +125,7 @@
   </style>
 </head>
 <body>
-  <h1>Murdock VAR System</h1>
+  <h1>Automated VAR System</h1>
   <div class="container">
     <div class="main-panel">
       <div id="controls">
@@ -127,11 +134,12 @@
           <option value="right">Team 1 Attacking Right</option>
           <option value="left">Team 1 Attacking Left</option>
         </select>
-        <button id="uploadBtn">Upload & Play</button>
+        <button id="uploadBtn">Upload &amp; Play</button>
         <button id="pauseBtn">Pause</button>
         <button id="halftimeBtn">Halftime</button>
       </div>
       <div id="status">Idle</div>
+      <div id="error" role="alert" aria-live="assertive"></div>
       <video id="video" style="display: none;"></video>
       <canvas id="canvas"></canvas>
     </div>
@@ -141,7 +149,7 @@
     </div>
   </div>
   <footer>
-    © 2025 Murdock VAR System — For Research & Development Use Only
+    © 2025 Automated VAR System — For Research &amp; Development Use Only
   </footer>
   <script src="/static/app.js"></script>
 </body>

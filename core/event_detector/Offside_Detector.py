@@ -11,7 +11,7 @@ class OffsideDetector:
     def update_candidates(self, attackers, defenders, ball_position, attack_dir, frame_width):
         self.offside_candidates = []
 
-        if len(defenders) < 2:
+        if len(defenders) < 2 or ball_position is None:
             return
 
         sorted_defs = sorted(defenders, key=lambda d: self._get_far_side(d['bbox'], attack_dir), reverse=(attack_dir == 'left'))
@@ -22,23 +22,25 @@ class OffsideDetector:
 
         for player in attackers:
             player_x = self._get_far_side(player['bbox'], attack_dir)
+            condition_results = {}
 
-            condition_results = {
-                "Ball is played or touched by teammate": True,  # handled externally
-                "Player is in opponent's half": (
-                    (attack_dir == "right" and player_x > frame_width // 2) or
-                    (attack_dir == "left" and player_x < frame_width // 2)
-                ),
-                "Player is ahead of the second-last defender": (
-                    (attack_dir == "right" and player_x > second_last_def_x) or
-                    (attack_dir == "left" and player_x < second_last_def_x)
-                ),
-                "Player is ahead of the ball": (
-                    (attack_dir == "right" and player_x > ball_x) or
-                    (attack_dir == "left" and player_x < ball_x)
-                ),
-                "Player interferes with play": True  # evaluated on possession
-            }
+            for condition in conditions:
+                if condition == "Ball is played or touched by teammate":
+                    condition_results[condition] = True
+                elif condition == "Player is in opponent's half":
+                    condition_results[condition] = True
+                elif condition == "Player is ahead of the second-last defender":
+                    condition_results[condition] = (
+                        (attack_dir == "right" and player_x > second_last_def_x) or
+                        (attack_dir == "left" and player_x < second_last_def_x)
+                    )
+                elif condition == "Player is ahead of the ball":
+                    condition_results[condition] = (
+                        (attack_dir == "right" and player_x > ball_x) or
+                        (attack_dir == "left" and player_x < ball_x)
+                    )
+                elif condition == "Player interferes with play":
+                    condition_results[condition] = True
 
             if all(condition_results.get(c, False) for c in conditions):
                 self.offside_candidates.append((player['id'], player.get('team')))
