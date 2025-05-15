@@ -12,6 +12,7 @@ from .event_detector.Event_Detecor import EventDetector
 from .assigners.Ball_Kick_Detector import BallKickDetector
 #from .replay_buffer_broken import ReplayBuffer
 from utils.bbox_utils import get_centre
+from .event_detector.Rule_Knowledge_Graph import RuleKnowledgeGraph
 
 class LiveProcessor:
     """
@@ -34,6 +35,9 @@ class LiveProcessor:
         self.detect_every = max(1, int(detect_every))
         self.fps = int(self.cap.get(cv2.CAP_PROP_FPS)) or 30
         width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+
+        self.rules_graph = RuleKnowledgeGraph()
+        self.rules_graph.visualize("rules.png")  # saved in the working directory
 
         # Initialize processing modules
         self.detector = Detector()  # object detector
@@ -84,6 +88,8 @@ class LiveProcessor:
         """
         self.frame_count += 1
         frame_id = int(self.cap.get(cv2.CAP_PROP_POS_FRAMES))
+
+        
 
         # Skip processing during half-time
         if self.halftime_mode:
